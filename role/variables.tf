@@ -47,7 +47,6 @@ variable "permissions_boundary" {
   description = "Policy name to be attached as permission boundary to the role"
   type        = string
   default     = null
-  nullable    = true
 }
 
 variable "tags" {

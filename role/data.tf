@@ -22,7 +22,7 @@ data "aws_iam_policy_document" "assume_role_policy" {
     for_each = local.assume_role_policy["Statement"]
 
     content {
-      sid = try(statement.value["Sid"], null)
+      sid = lookup(statement.value, "Sid", null)
 
       effect = statement.value["Effect"]
 
@@ -49,7 +49,7 @@ data "aws_iam_policy_document" "assume_role_policy" {
 
       dynamic "condition" {
         for_each = distinct(flatten([
-          for test, variables in try(statement.value["Condition"], {}) : [
+          for test, variables in lookup(statement.value, "Condition", {}) : [
             for variable, values in variables : {
               test     = test
               variable = variable
@@ -89,7 +89,7 @@ data "aws_iam_policy_document" "inline_policy" {
     for_each = each.value[index(each.value, coalesce(reverse(each.value)...))]["Statement"]
 
     content {
-      sid = try(statement.value["Sid"], null)
+      sid = lookup(statement.value, "Sid", null)
 
       effect = statement.value["Effect"]
 
@@ -101,7 +101,7 @@ data "aws_iam_policy_document" "inline_policy" {
 
       dynamic "condition" {
         for_each = distinct(flatten([
-          for test, variables in try(statement.value["Condition"], {}) : [
+          for test, variables in lookup(statement.value, "Condition", {}) : [
             for variable, values in variables : {
               test     = test
               variable = variable
