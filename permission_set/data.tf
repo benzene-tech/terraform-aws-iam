@@ -1,20 +1,14 @@
 locals {
-  policy_document = jsondecode(var.inline_policy_document)
-}
-
-data "aws_iam_policy" "this" {
-  for_each = toset(var.aws_managed_policies)
-
-  name = each.value
+  inline_policy = jsondecode(var.inline_policy)
 }
 
 data "aws_iam_policy_document" "this" {
-  count = local.policy_document != null ? 1 : 0
+  count = local.inline_policy != null ? 1 : 0
 
-  version = local.policy_document["Version"]
+  version = local.inline_policy["Version"]
 
   dynamic "statement" {
-    for_each = local.policy_document["Statement"]
+    for_each = flatten([local.inline_policy["Statement"]])
 
     content {
       sid = lookup(statement.value, "Sid", null)
@@ -49,12 +43,12 @@ data "aws_iam_policy_document" "this" {
 
   lifecycle {
     precondition {
-      condition     = alltrue([for statement in local.policy_document["Statement"] : ((can(statement["Action"]) || can(statement["NotAction"])) && !(can(statement["Action"]) && can(statement["NotAction"])))])
+      condition     = alltrue([for statement in flatten([local.inline_policy["Statement"]]) : ((can(statement["Action"]) || can(statement["NotAction"])) && !(can(statement["Action"]) && can(statement["NotAction"])))])
       error_message = "${var.name} inline policy statement must contain either Action or NotAction"
     }
 
     precondition {
-      condition     = alltrue([for statement in local.policy_document["Statement"] : ((can(statement["Resource"]) || can(statement["NotResource"])) && !(can(statement["Resource"]) && can(statement["NotResource"])))])
+      condition     = alltrue([for statement in flatten([local.inline_policy["Statement"]]) : ((can(statement["Resource"]) || can(statement["NotResource"])) && !(can(statement["Resource"]) && can(statement["NotResource"])))])
       error_message = "${var.name} inline policy statement must contain either Resource or NotResource"
     }
   }

@@ -21,8 +21,8 @@ variable "ssoadmin_instance" {
 }
 
 variable "aws_managed_policies" {
-  description = "List of AWS managed policies to be attached to the permission set"
-  type        = list(string)
+  description = "Set of AWS managed policies to be attached to the permission set"
+  type        = set(string)
   default     = []
   nullable    = false
 }
@@ -39,11 +39,26 @@ variable "customer_managed_policies" {
   }
 }
 
-variable "inline_policy_document" {
-  description = "JSON encoded inline policy document for permission set"
+variable "inline_policy" {
+  description = "JSON encoded inline policy for permission set"
   type        = string
   default     = "null"
   nullable    = false
+}
+
+variable "permissions_boundary" {
+  description = "Policy name to be attached as permission boundary to the role"
+  type = object({
+    managed_by = string
+    name       = string
+    path       = optional(string, null)
+  })
+  default = null
+
+  validation {
+    condition     = var.permissions_boundary != null ? contains(["AWS", "Customer"], var.permissions_boundary.managed_by) : true
+    error_message = "Managed by should be either 'AWS' or 'Customer'"
+  }
 }
 
 variable "tags" {

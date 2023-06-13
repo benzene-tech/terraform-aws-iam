@@ -4,10 +4,10 @@ resource "aws_ssoadmin_permission_set" "this" {
 }
 
 resource "aws_ssoadmin_managed_policy_attachment" "this" {
-  for_each = toset(var.aws_managed_policies)
+  for_each = var.aws_managed_policies
 
   instance_arn       = var.ssoadmin_instance
-  managed_policy_arn = data.aws_iam_policy.this[each.key].arn
+  managed_policy_arn = "arn:aws:iam::aws:policy/${each.value}"
   permission_set_arn = aws_ssoadmin_permission_set.this.arn
 }
 
@@ -26,10 +26,29 @@ resource "aws_ssoadmin_customer_managed_policy_attachment" "this" {
   }
 }
 
-resource "aws_ssoadmin_permission_set_inline_policy" "example" {
-  count = local.policy_document != null ? 1 : 0
+resource "aws_ssoadmin_permission_set_inline_policy" "this" {
+  count = local.inline_policy != null ? 1 : 0
 
   inline_policy      = one(data.aws_iam_policy_document.this[*].json)
   instance_arn       = var.ssoadmin_instance
   permission_set_arn = aws_ssoadmin_permission_set.this.arn
+}
+
+resource "aws_ssoadmin_permissions_boundary_attachment" "this" {
+  count = var.permissions_boundary != null ? 1 : 0
+
+  instance_arn       = aws_ssoadmin_permission_set.this.instance_arn
+  permission_set_arn = aws_ssoadmin_permission_set.this.arn
+
+  permissions_boundary {
+    managed_policy_arn = var.permissions_boundary.managed_by == "AWS" ? "arn:aws:iam::aws:policy/${var.permissions_boundary.policy_name}" : null
+    dynamic "customer_managed_policy_reference" {
+      for_each = var.permissions_boundary.managed_by == "Customer" ? { var.permissions_boundary.name : var.permissions_boundary.path } : {}
+
+      content {
+        name = customer_managed_policy_reference.key
+        path = customer_managed_policy_reference.value
+      }
+    }
+  }
 }

@@ -27,20 +27,17 @@ variable "assume_role_policy" {
 }
 
 variable "policies" {
-  description = "List of policies to be attached to the role"
-  type        = list(string)
+  description = "Set of policies to be attached to the role"
+  type        = set(string)
   default     = []
   nullable    = false
 }
 
 variable "inline_policies" {
   description = "Inline policies to be attached to the role"
-  type = list(object({
-    Name   = string
-    Policy = string
-  }))
-  default  = []
-  nullable = false
+  type        = map(string)
+  default     = {}
+  nullable    = false
 }
 
 variable "permissions_boundary" {

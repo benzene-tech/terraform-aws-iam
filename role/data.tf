@@ -1,10 +1,10 @@
 locals {
   assume_role_policy = jsondecode(var.assume_role_policy)
-  inline_policies    = { for inline_policy in var.inline_policies : inline_policy.Name => jsondecode(inline_policy.Policy)... }
+  inline_policies    = { for name, policy in var.inline_policies : name => jsondecode(policy) }
 }
 
 data "aws_iam_policy" "managed_policies" {
-  for_each = toset(var.policies)
+  for_each = var.policies
 
   name = each.value
 }
@@ -19,7 +19,7 @@ data "aws_iam_policy_document" "assume_role_policy" {
   version = local.assume_role_policy["Version"]
 
   dynamic "statement" {
-    for_each = local.assume_role_policy["Statement"]
+    for_each = flatten([local.assume_role_policy["Statement"]])
 
     content {
       sid = lookup(statement.value, "Sid", null)
@@ -69,12 +69,12 @@ data "aws_iam_policy_document" "assume_role_policy" {
 
   lifecycle {
     precondition {
-      condition     = alltrue([for statement in local.assume_role_policy["Statement"] : ((can(statement["Action"]) || can(statement["NotAction"])) && !(can(statement["Action"]) && can(statement["NotAction"])))])
+      condition     = alltrue([for statement in flatten([local.assume_role_policy["Statement"]]) : ((can(statement["Action"]) || can(statement["NotAction"])) && !(can(statement["Action"]) && can(statement["NotAction"])))])
       error_message = "${var.name} assume role policy must contain either Action or NotAction"
     }
 
     precondition {
-      condition     = alltrue([for statement in local.assume_role_policy["Statement"] : ((can(statement["Principal"]) || (can(statement["NotPrincipal"]) && statement["Effect"] != "Allow")) && !(can(statement["Principal"]) && can(statement["NotPrincipal"])))])
+      condition     = alltrue([for statement in flatten([local.assume_role_policy["Statement"]]) : ((can(statement["Principal"]) || (can(statement["NotPrincipal"]) && statement["Effect"] != "Allow")) && !(can(statement["Principal"]) && can(statement["NotPrincipal"])))])
       error_message = "${var.name} assume role policy must contain either Principal or NotPrincipal with Deny"
     }
   }
@@ -83,10 +83,10 @@ data "aws_iam_policy_document" "assume_role_policy" {
 data "aws_iam_policy_document" "inline_policy" {
   for_each = local.inline_policies
 
-  version = each.value[index(each.value, coalesce(reverse(each.value)...))]["Version"]
+  version = each.value["Version"]
 
   dynamic "statement" {
-    for_each = each.value[index(each.value, coalesce(reverse(each.value)...))]["Statement"]
+    for_each = flatten([each.value["Statement"]])
 
     content {
       sid = lookup(statement.value, "Sid", null)
@@ -121,12 +121,12 @@ data "aws_iam_policy_document" "inline_policy" {
 
   lifecycle {
     precondition {
-      condition     = alltrue([for statement in each.value[index(each.value, coalesce(reverse(each.value)...))]["Statement"] : ((can(statement["Action"]) || can(statement["NotAction"])) && !(can(statement["Action"]) && can(statement["NotAction"])))])
+      condition     = alltrue([for statement in flatten([each.value["Statement"]]) : ((can(statement["Action"]) || can(statement["NotAction"])) && !(can(statement["Action"]) && can(statement["NotAction"])))])
       error_message = "${each.key} inline policy in ${var.name} policy must contain either Action or NotAction"
     }
 
     precondition {
-      condition     = alltrue([for statement in each.value[index(each.value, coalesce(reverse(each.value)...))]["Statement"] : ((can(statement["Resource"]) || can(statement["NotResource"])) && !(can(statement["Resource"]) && can(statement["NotResource"])))])
+      condition     = alltrue([for statement in flatten([each.value["Statement"]]) : ((can(statement["Resource"]) || can(statement["NotResource"])) && !(can(statement["Resource"]) && can(statement["NotResource"])))])
       error_message = "${each.key} inline policy in ${var.name} policy must contain either Resource or NotResource"
     }
   }

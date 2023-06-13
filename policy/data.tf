@@ -6,7 +6,7 @@ data "aws_iam_policy_document" "this" {
   version = local.policy_document["Version"]
 
   dynamic "statement" {
-    for_each = local.policy_document["Statement"]
+    for_each = flatten([local.policy_document["Statement"]])
 
     content {
       sid = lookup(statement.value, "Sid", null)
@@ -41,12 +41,12 @@ data "aws_iam_policy_document" "this" {
 
   lifecycle {
     precondition {
-      condition     = alltrue([for statement in local.policy_document["Statement"] : ((can(statement["Action"]) || can(statement["NotAction"])) && !(can(statement["Action"]) && can(statement["NotAction"])))])
+      condition     = alltrue([for statement in flatten([local.policy_document["Statement"]]) : ((can(statement["Action"]) || can(statement["NotAction"])) && !(can(statement["Action"]) && can(statement["NotAction"])))])
       error_message = "${var.name} policy statement must contain either Action or NotAction"
     }
 
     precondition {
-      condition     = alltrue([for statement in local.policy_document["Statement"] : ((can(statement["Resource"]) || can(statement["NotResource"])) && !(can(statement["Resource"]) && can(statement["NotResource"])))])
+      condition     = alltrue([for statement in flatten([local.policy_document["Statement"]]) : ((can(statement["Resource"]) || can(statement["NotResource"])) && !(can(statement["Resource"]) && can(statement["NotResource"])))])
       error_message = "${var.name} policy statement must contain either Resource or NotResource"
     }
   }
