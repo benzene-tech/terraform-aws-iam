@@ -1,11 +1,11 @@
 variable "name" {
-  description = "Name of the user"
+  description = "Name of the group"
   type        = string
   nullable    = false
 
   validation {
     condition     = can(regex("^[A-Za-z0-9+=,\\.@\\-_]+$", var.name))
-    error_message = "User's name can contain only alphanumeric and '+=,.@-_' characters"
+    error_message = "Group's name can contain only alphanumeric and '+=,.@-_' characters"
   }
 }
 
@@ -20,14 +20,28 @@ variable "path" {
   }
 }
 
-variable "permissions_boundary" {
-  description = "Policy name to be attached as permission boundary to the user"
-  type        = string
+variable "users" {
+  description = "Users to be assigned to the group"
+  type        = set(string)
   default     = null
 }
 
+variable "policies" {
+  description = "Set of policies to be attached to the group"
+  type        = set(string)
+  default     = []
+  nullable    = false
+}
+
+variable "policy_documents" {
+  description = "Policy documents to be attached to the group"
+  type        = map(string)
+  default     = {}
+  nullable    = false
+}
+
 variable "tags" {
-  description = "Tags to be assigned to the user"
+  description = "Tags to be assigned to the group"
   type        = map(string)
   default     = null
 }
