@@ -16,6 +16,7 @@ resource "aws_ssoadmin_customer_managed_policy_attachment" "this" {
 
   instance_arn       = aws_ssoadmin_permission_set.this.instance_arn
   permission_set_arn = aws_ssoadmin_permission_set.this.arn
+
   dynamic "customer_managed_policy_reference" {
     for_each = var.customer_managed_policies
 
@@ -41,7 +42,8 @@ resource "aws_ssoadmin_permissions_boundary_attachment" "this" {
   permission_set_arn = aws_ssoadmin_permission_set.this.arn
 
   permissions_boundary {
-    managed_policy_arn = var.permissions_boundary.managed_by == "AWS" ? "arn:aws:iam::aws:policy/${var.permissions_boundary.policy_name}" : null
+    managed_policy_arn = var.permissions_boundary.managed_by == "AWS" ? "arn:aws:iam::aws:policy/${var.permissions_boundary.name}" : null
+
     dynamic "customer_managed_policy_reference" {
       for_each = var.permissions_boundary.managed_by == "Customer" ? { var.permissions_boundary.name : var.permissions_boundary.path } : {}
 
