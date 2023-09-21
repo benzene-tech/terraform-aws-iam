@@ -2,6 +2,12 @@ locals {
   inline_policy = jsondecode(var.inline_policy)
 }
 
+data "aws_iam_policy" "this" {
+  for_each = toset(compact(concat(tolist(var.customer_managed_policies), (var.permissions_boundary.managed_by == "Customer" ? [var.permissions_boundary.name] : []))))
+
+  name = each.value
+}
+
 data "aws_iam_policy_document" "this" {
   count = local.inline_policy != null ? 1 : 0
 

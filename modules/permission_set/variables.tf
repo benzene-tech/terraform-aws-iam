@@ -29,8 +29,8 @@ variable "aws_managed_policies" {
 
 variable "customer_managed_policies" {
   description = "Customer managed policies to be attached to the permission set"
-  type        = map(string)
-  default     = {}
+  type        = set(string)
+  default     = []
   nullable    = false
 
   validation {
@@ -51,7 +51,6 @@ variable "permissions_boundary" {
   type = object({
     managed_by = string
     name       = string
-    path       = optional(string, null)
   })
   default = null
 

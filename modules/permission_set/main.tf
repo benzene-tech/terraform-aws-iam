@@ -21,8 +21,8 @@ resource "aws_ssoadmin_customer_managed_policy_attachment" "this" {
     for_each = var.customer_managed_policies
 
     content {
-      name = customer_managed_policy_reference.key
-      path = customer_managed_policy_reference.value
+      name = customer_managed_policy_reference.value
+      path = data.aws_iam_policy.this[customer_managed_policy_reference.key].path
     }
   }
 }
@@ -45,11 +45,11 @@ resource "aws_ssoadmin_permissions_boundary_attachment" "this" {
     managed_policy_arn = var.permissions_boundary.managed_by == "AWS" ? "arn:aws:iam::aws:policy/${var.permissions_boundary.name}" : null
 
     dynamic "customer_managed_policy_reference" {
-      for_each = var.permissions_boundary.managed_by == "Customer" ? { var.permissions_boundary.name : var.permissions_boundary.path } : {}
+      for_each = var.permissions_boundary.managed_by == "Customer" ? [var.permissions_boundary.name] : []
 
       content {
-        name = customer_managed_policy_reference.key
-        path = customer_managed_policy_reference.value
+        name = customer_managed_policy_reference.value
+        path = data.aws_iam_policy.this[customer_managed_policy_reference.key].path
       }
     }
   }
