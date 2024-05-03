@@ -6,6 +6,12 @@ resource "aws_iam_role" "this" {
   permissions_boundary = one(data.aws_iam_policy.permissions_boundary[*].arn)
 
   dynamic "inline_policy" {
+    for_each = length(local.inline_policies) == 0 ? [null] : []
+
+    content {}
+  }
+
+  dynamic "inline_policy" {
     for_each = keys(local.inline_policies)
 
     content {
