@@ -5,20 +5,14 @@ resource "aws_iam_role" "this" {
   managed_policy_arns  = [for policy in data.aws_iam_policy.managed_policies : policy.arn]
   permissions_boundary = one(data.aws_iam_policy.permissions_boundary[*].arn)
 
-  dynamic "inline_policy" {
-    for_each = length(local.inline_policies) == 0 ? [null] : []
-
-    content {}
-  }
-
-  dynamic "inline_policy" {
-    for_each = keys(local.inline_policies)
-
-    content {
-      name   = inline_policy.value
-      policy = data.aws_iam_policy_document.inline_policy[inline_policy.value].json
-    }
-  }
-
   tags = var.tags
+}
+
+resource "aws_iam_role_policy" "this" {
+  for_each = keys(local.inline_policies)
+
+  name = each.value
+  role = aws_iam_role.this.id
+
+  policy = data.aws_iam_policy_document.inline_policy[each.value].json
 }
