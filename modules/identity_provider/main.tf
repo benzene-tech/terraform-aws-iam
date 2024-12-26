@@ -1,9 +1,8 @@
 resource "aws_iam_openid_connect_provider" "this" {
   count = var.type == "OpenID connect" ? 1 : 0
 
-  url             = one(data.tls_certificate.this[*].url)
-  client_id_list  = var.openid_connect.audience
-  thumbprint_list = one(data.tls_certificate.this[*].certificates[*].sha1_fingerprint)
+  url            = "https://${var.openid_connect.provider}"
+  client_id_list = var.openid_connect.audience
 
   tags = var.tags
 }

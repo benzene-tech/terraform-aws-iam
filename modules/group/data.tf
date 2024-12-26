@@ -11,7 +11,7 @@ data "aws_iam_policy" "this" {
 data "aws_iam_policy_document" "this" {
   for_each = var.name != null ? local.policy_documents : {}
 
-  version = each.value["Version"]
+  version = lookup(each.value, "Version", null)
 
   dynamic "statement" {
     for_each = flatten([each.value["Statement"]])

@@ -16,7 +16,7 @@ data "aws_iam_policy" "permissions_boundary" {
 }
 
 data "aws_iam_policy_document" "assume_role_policy" {
-  version = local.assume_role_policy["Version"]
+  version = lookup(local.assume_role_policy, "Version", null)
 
   dynamic "statement" {
     for_each = flatten([local.assume_role_policy["Statement"]])
@@ -83,7 +83,7 @@ data "aws_iam_policy_document" "assume_role_policy" {
 data "aws_iam_policy_document" "inline_policy" {
   for_each = local.inline_policies
 
-  version = each.value["Version"]
+  version = lookup(each.value, "Version", null)
 
   dynamic "statement" {
     for_each = flatten([each.value["Statement"]])
