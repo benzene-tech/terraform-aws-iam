@@ -11,7 +11,7 @@ data "aws_iam_policy" "this" {
 data "aws_iam_policy_document" "this" {
   count = local.inline_policy != null ? 1 : 0
 
-  version = local.inline_policy["Version"]
+  version = lookup(local.inline_policy, "Version", null)
 
   dynamic "statement" {
     for_each = flatten([local.inline_policy["Statement"]])

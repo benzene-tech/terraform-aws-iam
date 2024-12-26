@@ -3,7 +3,7 @@ locals {
 }
 
 data "aws_iam_policy_document" "this" {
-  version = local.policy_document["Version"]
+  version = lookup(local.policy_document, "Version", null)
 
   dynamic "statement" {
     for_each = flatten([local.policy_document["Statement"]])
