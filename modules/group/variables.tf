@@ -40,8 +40,12 @@ variable "policy_documents" {
   nullable    = false
 }
 
-variable "tags" {
-  description = "Tags to be assigned to the group"
-  type        = map(string)
-  default     = null
+variable "exclusive" {
+  description = "Maintain exclusive management of Inline and Attached policies"
+  type = object({
+    role_policy_attachment = optional(bool, true)
+    role_policy            = optional(bool, true)
+  })
+  default  = {}
+  nullable = false
 }

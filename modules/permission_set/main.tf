@@ -1,6 +1,8 @@
 resource "aws_ssoadmin_permission_set" "this" {
   name         = var.name
   instance_arn = var.ssoadmin_instance
+
+  tags = var.tags
 }
 
 resource "aws_ssoadmin_managed_policy_attachment" "this" {
