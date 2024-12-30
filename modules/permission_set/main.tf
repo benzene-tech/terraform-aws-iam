@@ -28,7 +28,7 @@ resource "aws_ssoadmin_customer_managed_policy_attachment" "this" {
 }
 
 resource "aws_ssoadmin_permission_set_inline_policy" "this" {
-  count = local.inline_policy != null ? 1 : 0
+  count = var.inline_policy != null ? 1 : 0
 
   inline_policy      = one(data.aws_iam_policy_document.this[*].json)
   instance_arn       = var.ssoadmin_instance

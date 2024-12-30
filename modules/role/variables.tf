@@ -22,7 +22,7 @@ variable "path" {
 
 variable "assume_role_policy" {
   description = "Policy that grants an entity permission to assume the role"
-  type        = string
+  type        = map(any)
   nullable    = false
 }
 
@@ -35,7 +35,7 @@ variable "policies" {
 
 variable "inline_policies" {
   description = "Inline policies to be attached to the role"
-  type        = map(string)
+  type        = map(any)
   default     = {}
   nullable    = false
 }

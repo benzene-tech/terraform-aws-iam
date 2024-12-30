@@ -1,8 +1,3 @@
-locals {
-  assume_role_policy = jsondecode(var.assume_role_policy)
-  inline_policies    = { for name, policy in var.inline_policies : name => jsondecode(policy) }
-}
-
 data "aws_iam_policy" "managed_policies" {
   for_each = var.policies
 
@@ -16,10 +11,10 @@ data "aws_iam_policy" "permissions_boundary" {
 }
 
 data "aws_iam_policy_document" "assume_role_policy" {
-  version = lookup(local.assume_role_policy, "Version", null)
+  version = lookup(var.assume_role_policy, "Version", null)
 
   dynamic "statement" {
-    for_each = flatten([local.assume_role_policy["Statement"]])
+    for_each = flatten([var.assume_role_policy["Statement"]])
 
     content {
       sid = lookup(statement.value, "Sid", null)
@@ -69,19 +64,19 @@ data "aws_iam_policy_document" "assume_role_policy" {
 
   lifecycle {
     precondition {
-      condition     = alltrue([for statement in flatten([local.assume_role_policy["Statement"]]) : ((can(statement["Action"]) || can(statement["NotAction"])) && !(can(statement["Action"]) && can(statement["NotAction"])))])
+      condition     = alltrue([for statement in flatten([var.assume_role_policy["Statement"]]) : ((can(statement["Action"]) || can(statement["NotAction"])) && !(can(statement["Action"]) && can(statement["NotAction"])))])
       error_message = "${var.name} assume role policy must contain either Action or NotAction"
     }
 
     precondition {
-      condition     = alltrue([for statement in flatten([local.assume_role_policy["Statement"]]) : ((can(statement["Principal"]) || (can(statement["NotPrincipal"]) && statement["Effect"] != "Allow")) && !(can(statement["Principal"]) && can(statement["NotPrincipal"])))])
+      condition     = alltrue([for statement in flatten([var.assume_role_policy["Statement"]]) : ((can(statement["Principal"]) || (can(statement["NotPrincipal"]) && statement["Effect"] != "Allow")) && !(can(statement["Principal"]) && can(statement["NotPrincipal"])))])
       error_message = "${var.name} assume role policy must contain either Principal or NotPrincipal with Deny"
     }
   }
 }
 
 data "aws_iam_policy_document" "inline_policy" {
-  for_each = local.inline_policies
+  for_each = var.inline_policies
 
   version = lookup(each.value, "Version", null)
 

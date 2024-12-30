@@ -35,7 +35,7 @@ variable "policies" {
 
 variable "policy_documents" {
   description = "Policy documents to be attached to the group"
-  type        = map(string)
+  type        = map(any)
   default     = {}
   nullable    = false
 }

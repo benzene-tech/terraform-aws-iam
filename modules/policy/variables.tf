@@ -22,7 +22,7 @@ variable "path" {
 
 variable "policy_document" {
   description = "Policy document"
-  type        = string
+  type        = map(any)
   nullable    = false
 }
 

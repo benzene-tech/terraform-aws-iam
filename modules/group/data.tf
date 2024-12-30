@@ -1,7 +1,3 @@
-locals {
-  policy_documents = { for name, policy in var.policy_documents : name => jsondecode(policy) }
-}
-
 data "aws_iam_policy" "this" {
   for_each = var.name != null ? var.policies : []
 
@@ -9,7 +5,7 @@ data "aws_iam_policy" "this" {
 }
 
 data "aws_iam_policy_document" "this" {
-  for_each = var.name != null ? local.policy_documents : {}
+  for_each = var.name != null ? var.policy_documents : {}
 
   version = lookup(each.value, "Version", null)
 
