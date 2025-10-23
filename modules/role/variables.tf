@@ -46,6 +46,16 @@ variable "permissions_boundary" {
   default     = null
 }
 
+variable "exclusive" {
+  description = "Maintain exclusive management of Inline and Attached policies"
+  type = object({
+    role_policy_attachment = optional(bool, true)
+    role_policy            = optional(bool, true)
+  })
+  default  = {}
+  nullable = false
+}
+
 variable "tags" {
   description = "Tags to be assigned to the role"
   type        = map(string)

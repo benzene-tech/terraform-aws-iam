@@ -40,7 +40,7 @@ variable "customer_managed_policies" {
 }
 
 variable "inline_policy" {
-  description = "JSON encoded inline policy for permission set"
+  description = "Inline policy for permission set"
   type        = string
   default     = "null"
   nullable    = false
