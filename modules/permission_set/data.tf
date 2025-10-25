@@ -3,7 +3,7 @@ locals {
 }
 
 data "aws_iam_policy" "this" {
-  for_each = toset(compact(concat(tolist(var.customer_managed_policies), (var.permissions_boundary.managed_by == "Customer" ? [var.permissions_boundary.name] : []))))
+  for_each = toset(compact(concat(tolist(var.aws_managed_policies), tolist(var.customer_managed_policies), [var.permissions_boundary])))
 
   name = each.value
 }
